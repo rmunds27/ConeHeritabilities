@@ -1,0 +1,167 @@
+library("reshape2")#
+library("lans2r")
+library("tidyverse")
+library("lans2r")
+library("RColorBrewer")
+library("rcartocolor")
+library("viridis")
+
+ddPCR<-read.table("ddPCR.csv",sep=",",header=TRUE)
+
+#plots for the sex groups of L:M ratios
+p <- ggplot(ddPCR, aes(x=Sex, y=Lratio, fill=Sex), show.legend=FALSE) + 
+  geom_violin()+
+  geom_boxplot(width=0.1, fill="light grey", outlier.size=2)
+p
+
+#color palette selection with HEX codes--Using Plasma/C
+q_colors =  50 # for no particular reason
+v_colors =  viridis(q_colors, option = "D")
+show_col(v_colors)
+v_colors
+
+# stat_n_text adds count of individuals per group  
+#cleaning up the above figure p, to make it look nicer
+FigMF_LM<-p+
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))+
+  stat_n_text(y.pos = 0.2, size=5) +
+  annotate("text",x=1, y=2.0, label="x=1.064", size=5)+
+  annotate("text",x=2, y=2.0, label="x=0.996", size=5)+
+  scale_x_discrete(name ="Sex",labels=c("F"="Females", "M"="Males")) + 
+  scale_colour_manual(values = c("#F1E51DFF","#423F85FF")) + 
+  scale_fill_manual(values = c("#F1E51DFF","#423F85FF"))+ 
+  theme(axis.line.x = element_line(color="black", size = 1.25), axis.line.y = element_line(color="black", size = 1.25)) +
+  theme(axis.ticks.x=element_blank())+
+  labs(y="Ratio of L to M cones")+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  theme(legend.position="none",
+        axis.text.x = element_text(colour = "black", size = 16, face = "bold"),
+        axis.text.y = element_text(colour = "black", size = 14),
+        axis.title.y = element_text(colour = "black", face = "bold", size = 16),
+        axis.title.x = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 14, face = "italic"))
+FigMF_LM
+
+#Age Group L:M ratios
+age<-ddPCR
+test_df <- age %>% mutate(AgeGroup = case_when(Age >= 15 ~ "Old Adult", Age == 14 | Age == 13 | Age == 12 | Age == 11 | Age == 10 ~ "Adult", Age == 9 | Age == 8 | Age == 7 | Age == 6 | Age == 5 ~ "Young Adult", Age == 4 | Age == 3 | Age == 2 | Age == 1 ~ "Juvenile", Age == "-1" ~ "Infant"))
+
+ro<-test_df%>% mutate(Group = factor(AgeGroup, levels=c("Infant","Juvenile","Young Adult","Adult","Old Adult")))
+
+ageGroups <- ggplot(ro, aes(x=Group, y=Lratio, fill=AgeGroup),show.legend=FALSE) + 
+  geom_violin()+
+geom_boxplot(width=0.1, fill="light grey", outlier.size=2)
+ageGroups
+
+
+#Optional color palette("#F48059FF","#BE1654FF", "#DC2A46FF", "#F6B691FF","#EF5940FF"))
+
+FigAge<-ageGroups+
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))+
+  stat_n_text(y.pos = 0.2, size=5) +
+  annotate("text",x=1, y=2.0, label="x=1.135", size=5)+
+  annotate("text",x=2, y=2.0, label="x=1.05", size=5)+
+  annotate("text",x=3, y=2.0, label="x=1.005", size=5)+
+  annotate("text",x=4, y=2.0, label="x=1.009", size=5)+
+  annotate("text",x=5, y=2.0, label="x=1.023", size=5)+
+  scale_x_discrete(name="AgeGroup", labels=c("Infant"="Infant","Juvenile"="Juvenile","Youg Adult"="Young Adult","Adult"="Adult","Old Adult"="Old Adult"))+
+  scale_colour_manual(values = c("#9FDA3AFF","#2F6B8EFF","#1F978BFF","#D6E21AFF","#5FCA61FF")) + 
+  scale_fill_manual(values =  c("#9FDA3AFF","#2F6B8EFF","#1F978BFF","#D6E21AFF","#5FCA61FF"))+
+  theme(axis.line.x = element_line(color="black", size = 1.25), axis.line.y = element_line(color="black", size = 1.25)) +
+  theme(axis.ticks.x=element_blank())+
+  labs(y="Ratio of L to M cones")+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  theme(legend.position="none",
+        axis.text.x = element_text(colour = "black", size = 16, face = "bold"),
+        axis.text.y = element_text(colour = "black", size = 14),
+        axis.title.y = element_text(colour = "black", face = "bold", size = 16),
+        axis.title.x = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 14, face = "italic"))
+
+FigAge
+
+#Combining both figures for the L:M ratios
+ggarrange(FigMF_LM,FigAge,
+          labels = c("A. Sex", "B. Age Group"),
+          ncol = 2, nrow = 1,
+          widths = c(2,2), heights = c(1))
+
+
+#S Ratio figures
+
+#Males & females
+sc<-read.table("ddPCR.csv",sep=",",header=TRUE)
+
+sp <- ggplot(sc, aes(x=Sex, y=Sratio, fill=Sex), show.legend=FALSE) + 
+  geom_violin()+
+  geom_boxplot(width=0.2, fill="light grey", outlier.size=2)
+sp
+
+FigMF_s<-sp+
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))+
+  stat_n_text(y.pos = 0.05, size=5) +
+  annotate("text",x=1, y=0.3, label="x=0.146", size=5)+
+  annotate("text",x=2, y=0.3, label="x=0.141", size=5)+
+  scale_x_discrete(name ="Sex",labels=c("F"="Females", "M"="Males")) + 
+  scale_colour_manual(values = c("#F1E51DFF","#423F85FF")) + 
+  scale_fill_manual(values = c("#F1E51DFF","#423F85FF"))+ 
+  theme(axis.line.x = element_line(color="black", size = 1.25), axis.line.y = element_line(color="black", size = 1.25)) +
+  theme(axis.ticks.x=element_blank())+
+  labs(y="Ratio of S to (L + M) cones")+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  theme(legend.position="none",
+        axis.text.x = element_text(colour = "black", size = 16, face = "bold"),
+        axis.text.y = element_text(colour = "black", size = 14),
+        axis.title.y = element_text(colour = "black", face = "bold", size = 16),
+        axis.title.x = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 14, face = "italic"))
+FigMF_s
+
+#S Age groups
+
+ages<-ddPCR
+test_df <- ages %>% mutate(AgeGroup = case_when(Age >= 15 ~ "Old Adult", Age == 14 | Age == 13 | Age == 12 | Age == 11 | Age == 10 ~ "Adult", Age == 9 | Age == 8 | Age == 7 | Age == 6 | Age == 5 ~ "Young Adult", Age == 4 | Age == 3 | Age == 2 | Age == 1 ~ "Juvenile", Age == "-1" ~ "Infant"))
+
+sro<-test_df%>% mutate(Group = factor(AgeGroup, levels=c("Infant","Juvenile","Young Adult","Adult","Old Adult")))
+
+
+SageGroups <- ggplot(sro, aes(x=Group, y=Sratio, fill=AgeGroup),show.legend=FALSE) + 
+  geom_violin()+
+  geom_boxplot(width=0.2, fill="light grey", outlier.size=2)
+SageGroups
+
+FigAgeS<-SageGroups+
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))+
+  stat_n_text(y.pos = 0.05, size=4) +
+  annotate("text",x=1, y=0.3, label="x=0.145", size=5)+
+  annotate("text",x=2, y=0.3, label="x=0.145", size=5)+
+  annotate("text",x=3, y=0.3, label="x=0.142", size=5)+
+  annotate("text",x=4, y=0.3, label="x=0.142", size=5)+
+  annotate("text",x=5, y=0.3, label="x=0.149", size=5)+
+  scale_x_discrete(name="ages", labels=c("Infant"="Infant","Juvenile"="Juvenile","Youg Adult"="Young Adult","Adult"="Adult","Old Adult"="Old Adult"))+
+  scale_colour_manual(values = c("#9FDA3AFF","#2F6B8EFF","#1F978BFF","#D6E21AFF","#5FCA61FF")) + 
+  scale_fill_manual(values =  c("#9FDA3AFF","#2F6B8EFF","#1F978BFF","#D6E21AFF","#5FCA61FF"))+
+  theme(axis.line.x = element_line(color="black", size = 1.25), axis.line.y = element_line(color="black", size = 1.25)) +
+  theme(axis.ticks.x=element_blank())+
+  labs(y="Ratio of S to (L + M) cones")+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  theme(legend.position="none",
+        axis.text.x = element_text(colour = "black", size = 16, face = "bold"),
+        axis.text.y = element_text(colour = "black", size = 14),
+        axis.title.y = element_text(colour = "black", face = "bold", size = 16),
+        axis.title.x = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 14, face = "italic"))
+FigAgeS
+
+#Combining the S ratio figures
+ggarrange(FigMF_s,FigAgeS,
+          labels = c("A. Sex", "B. Age Group"),
+          ncol = 2, nrow = 1,
+          widths = c(2,2), heights = c(1))
+
+
+
