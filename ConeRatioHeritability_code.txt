@@ -250,6 +250,25 @@ S
 
 plot_grid(L,S,labels=c('A','B'))
 
+#L:M ratio regression figure (Suppl Fig 2) with sex effect
+ggplot(PhenoRAW, aes(secs, Lratio))+geom_point()+geom_smooth()
+ML<-ggplot(ToD, aes(secs, Lratio, fill = Sex)) +geom_point() + geom_smooth()+
+  labs(y="Ratio of the L to M cones", x="Time of Day")+
+   ylim(0.5,2.0)+
+  theme_minimal()+
+  ggtitle("L:M ratio") +
+  scale_x_continuous(labels = c("08:20:00", "11:06:40", "13:53:20", "16:40:00
+")) +
+  guides(fill = "none") +
+  theme(axis.text.x = element_text(colour = "black", size = 13, angle = -25, hjust = 0),
+        axis.text.y = element_text(colour = "black", size = 13),
+        axis.title.y = element_text(colour = "black", face = "bold", size = 14),
+        axis.title.x = element_text(colour = "black", face = "bold", size = 14),
+        title = element_text(color = "black", face = "bold"),
+        legend.title = element_text(colour = "black", face = "bold", size = 14),
+        legend.text = element_text(colour = "black", size = 14),
+        legend.key.size = unit(1, 'cm'))
+
 
 
 
