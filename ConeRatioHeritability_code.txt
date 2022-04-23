@@ -15,7 +15,9 @@ library(lubridate)
 library(lme4)
 
 #import and clean data###################################################################################################################################################################################
-phenoRAW <- read.csv("ddPCR_DataToD.csv")
+
+
+phenoRAW <- read.csv("ddPCR_2022.csv")
 #remove infants and clean up column names for pheno data
 phenoRAW$secs<-as.numeric(period_to_seconds(hms(phenoRAW$TOD)))
 phenoRAW$hours<-phenoRAW$secs/3600
@@ -107,6 +109,7 @@ Sratio_base<- MCMCglmm(Sratio ~ sex+age+year+hours,data = pheno,
 summary(Sratio_base)
 plot(Sratio_base$VCV)
 Sratio_base$DIC
+
 
 
 #S-ratio animal model###############################################################################################
@@ -223,38 +226,40 @@ library(cowplot)
 library(ggplot2)
 
 L<-ggplot(data=FE_sumL,aes(x=value,y=effect))+
-  geom_point()+
+  geom_point(size=3)+
   geom_errorbarh(aes(xmin=min,xmax=max), size=1)+
   geom_vline(xintercept=0,color="red", size=1)+
   coord_cartesian(xlim=c(-0.2,0.2))+
   labs(title = 'L:M Ratio')+
   theme_minimal()+
   theme(axis.title.x=element_blank(),
-        axis.text.x = element_text(colour = "black", size = 12),
-        axis.text.y = element_text(colour = "black", size = 12),
+        axis.text.x = element_text(colour = "black", size = 14),
+        axis.text.y = element_text(colour = "black", size = 14),
         axis.title.y=element_blank())
 L
 
 S<-ggplot(data=FE_sumS,aes(x=value,y=effect))+
-  geom_point()+
+  geom_point(size=3)+
   geom_errorbarh(aes(xmin=min,xmax=max), size=1)+
   geom_vline(xintercept=0,color="red", size=1)+
   coord_cartesian(xlim=c(-0.05,0.05))+
   labs(title = 'S:L+M Ratio')+
   theme_minimal()+
   theme(axis.title.x=element_blank(),
-        axis.text.x = element_text(colour = "black", size = 12),
-        axis.text.y = element_text(colour = "black", size = 12),
+        axis.text.x = element_text(colour = "black", size = 14),
+        axis.text.y = element_text(colour = "black", size = 14),
         axis.title.y=element_blank())
 S
 
 plot_grid(L,S,labels=c('A','B'))
 
-#L:M ratio regression figure (Suppl Fig 2) with sex effect
-ggplot(pheno, aes(hours, Lratio))+geom_point()+geom_smooth()
-ML<-ggplot(pheno, aes(hours, Lratio, fill = sex)) +geom_point() + geom_smooth()+
+
+#Plot with under 1 year olds
+ggplot(phenoRAW, aes(hours, Lratio))+geom_point()+geom_smooth()
+ML<-ggplot(phenoRAW, aes(hours, Lratio, fill = Sex)) +geom_point() + geom_smooth()+
   labs(y="Ratio of the L to M cones", x="Time of Day")+
   ylim(0.5,2.0)+
+ # xlim(7.0,17.5)+
   theme_minimal()+
   guides(fill = "none") +
   theme(axis.text.x = element_text(colour = "black", size = 13, hjust = 0),
@@ -267,8 +272,21 @@ ML<-ggplot(pheno, aes(hours, Lratio, fill = sex)) +geom_point() + geom_smooth()+
         legend.key.size = unit(1, 'cm'))
 ML
 
-
-
-
-
-
+#plot without under 1 year olds.
+ggplot(pheno, aes(hours, Lratio))+geom_point()+geom_smooth()
+LM<-ggplot(pheno, aes(hours, Lratio, fill = sex)) +geom_point() + geom_smooth()+
+  labs(y="Ratio of the L to M cones", x="Time of Day")+
+  ylim(0.5,2.0)+
+ # xlim(8,18)+
+  scale_x_continuous(limits=c(8,18)) +
+  theme_minimal()+
+  guides(fill = "none") +
+  theme(axis.text.x = element_text(colour = "black", size = 13, hjust = 0),
+        axis.text.y = element_text(colour = "black", size = 13),
+        axis.title.y = element_text(colour = "black", face = "bold", size = 14),
+        axis.title.x = element_text(colour = "black", face = "bold", size = 14),
+        title = element_text(color = "black", face = "bold"),
+        legend.title = element_text(colour = "black", face = "bold", size = 14),
+        legend.text = element_text(colour = "black", size = 14),
+        legend.key.size = unit(1, 'cm'))
+LM
